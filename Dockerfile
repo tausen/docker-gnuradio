@@ -2,14 +2,13 @@ FROM ubuntu:16.04
 
 RUN apt-get update && apt-get -y install \
      python-pip \
-     python-numpy \
      python-apt
 
 RUN pip install PyBOMBS
 
 RUN pybombs auto-config
 
-RUN pybombs recipes add gr-recipes git+https://github.com/gnuradio/gr-recipes.git
+RUN pybombs recipes add-defaults
 RUN pybombs prefix init /gnuradio -a gnuradio -R gnuradio-default
 RUN /bin/bash -c 'source /gnuradio/setup_env.sh && pybombs install gr-iio'
 
