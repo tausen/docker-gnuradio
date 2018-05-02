@@ -31,6 +31,8 @@ RUN cd /gnuradio/src/gr-iio && \
     git checkout variable_dev_names_v0.3 && \
     pybombs rebuild gr-iio
 
+ENV QT_X11_NO_MITSHM 1
+
 RUN adduser --disabled-password --gecos "" --uid 1000 developer
 USER developer
 ENV HOME /home/developer
