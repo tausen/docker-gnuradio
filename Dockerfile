@@ -37,6 +37,9 @@ RUN apt-get update && apt-get -y install \
 # Fix xterm_executable in gnuradio configuration
 RUN sed -i 's/xterm_executable.*/xterm_executable = \/usr\/bin\/xterm/' /gnuradio/etc/gnuradio/conf.d/grc.conf
 
+# Download UHD USRP images
+RUN /gnuradio/lib/uhd/utils/uhd_images_downloader.py
+
 ENV QT_X11_NO_MITSHM 1
 
 RUN adduser --disabled-password --gecos "" --uid 1000 developer
