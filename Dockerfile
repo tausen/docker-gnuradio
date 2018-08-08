@@ -40,6 +40,11 @@ RUN sed -i 's/xterm_executable.*/xterm_executable = \/usr\/bin\/xterm/' /gnuradi
 # Download UHD USRP images
 RUN /gnuradio/lib/uhd/utils/uhd_images_downloader.py
 
+# gr_filter_design dependencies
+RUN apt-get update && apt-get -y install \
+    python-scipy \
+    python-qwt5-qt4
+
 ENV QT_X11_NO_MITSHM 1
 
 RUN adduser --disabled-password --gecos "" --uid 1000 developer
