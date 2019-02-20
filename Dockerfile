@@ -45,6 +45,10 @@ RUN apt-get update && apt-get -y install \
     python-scipy \
     python-qwt5-qt4
 
+# install some editors for use with embedded Python blocks
+RUN apt-get update && \
+    apt-get -y install xdg-utils emacs gedit nano vim
+
 ENV QT_X11_NO_MITSHM 1
 
 RUN adduser --disabled-password --gecos "" --uid 1000 developer
@@ -53,3 +57,8 @@ ENV HOME /home/developer
 WORKDIR /home/developer/work
 ENTRYPOINT ["/opt/docker-entry-script.sh"]
 
+# set default editor to gedit, ensure gnuradio also uses it
+RUN echo 'SELECTED_EDITOR=/usr/bin/gedit' > /home/developer/.selected_editor
+RUN mkdir -p ~/.local/share/applications
+RUN mkdir -p ~/.config
+RUN xdg-mime default gedit.desktop text/x-python
