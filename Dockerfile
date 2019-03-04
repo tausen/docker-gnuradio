@@ -49,6 +49,18 @@ RUN apt-get update && apt-get -y install \
 RUN apt-get update && \
     apt-get -y install xdg-utils emacs gedit nano vim
 
+RUN /bin/bash -c 'cd / && \
+    git clone https://github.com/lofaldli/gr-ccsds.git && \
+    cd gr-ccsds && \
+    git checkout e13cab4177ae4fef521a1347f04e46b53249a35c && \
+    sed -i "s/\#if 1/\#if 0/g" lib/correlator_impl.cc && \
+    mkdir build && \
+    cd build && \
+    source /gnuradio/setup_env.sh && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=$(gnuradio-config-info --prefix) && \
+    make && \
+    make install'
+
 ENV QT_X11_NO_MITSHM 1
 
 RUN adduser --disabled-password --gecos "" --uid 1000 developer
