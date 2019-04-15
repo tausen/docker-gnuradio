@@ -50,9 +50,9 @@ RUN apt-get update && \
     apt-get -y install xdg-utils emacs gedit nano vim
 
 RUN /bin/bash -c 'cd / && \
-    git clone https://github.com/lofaldli/gr-ccsds.git && \
+    git clone https://github.com/gs-jgj/gr-ccsds.git && \
     cd gr-ccsds && \
-    git checkout e13cab4177ae4fef521a1347f04e46b53249a35c && \
+    git checkout 27403a22414dada1f77c30a803cd5daae330ae8d && \
     sed -i "s/\#if 1/\#if 0/g" lib/correlator_impl.cc && \
     mkdir build && \
     cd build && \
