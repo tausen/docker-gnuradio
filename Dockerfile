@@ -25,10 +25,15 @@ RUN echo "source /opt/bash-init-script.sh" >> /opt/docker-entry-script.sh
 RUN echo "/bin/bash -c \"\$*\"" >> /opt/docker-entry-script.sh
 RUN chmod a+x /opt/docker-entry-script.sh
 
+RUN cd /gnuradio/src/libiio && \
+    git fetch && \
+    git checkout v0.17 && \
+    pybombs rebuild libiio
+
 RUN cd /gnuradio/src/gr-iio && \
     git remote add tausen https://github.com/tausen/gr-iio.git && \
     git fetch tausen && \
-    git checkout variable_dev_names_v0.3 && \
+    git checkout 5883d004f8a6e376748b17cd5b0841d3eb7c7a17 && \
     pybombs rebuild gr-iio
 
 RUN apt-get update && apt-get -y install \
