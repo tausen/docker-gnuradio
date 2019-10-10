@@ -44,23 +44,29 @@ RUN pybombs recipes add gr-etcetera git+https://github.com/gnuradio/gr-etcetera.
 RUN /bin/bash -c ' \
     pybombs prefix init /gnuradio'
 RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
-    pybombs config --package gnuradio gitrev v3.7.13.5 && \
+    pybombs config --package gnuradio gitrev 813412a1d0 && \
     pybombs install gnuradio'
 
 # Install specific gr-iio version
 RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
     pybombs fetch gr-iio && \
     cd /gnuradio/src/gr-iio && \
-    git remote add tausen https://github.com/tausen/gr-iio.git && \
-    git fetch tausen && \
-    git checkout gnuradio-docker-2.1 && \
+    git checkout 8d180d6c6 && \
     pybombs install gr-iio'
 
+# TODO: rebase variable_dev_names to upgrade-3.8 branch - requires changes
+# RUN cd /gnuradio/src/gr-iio && \
+#     git remote add tausen https://github.com/tausen/gr-iio.git && \
+#     git fetch tausen && \
+#     git checkout 5883d004f8a6e376748b17cd5b0841d3eb7c7a17 && \
+#     pybombs rebuild gr-iio
+
 # Install some additional gnuradio components
-RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
-    pybombs install gr-ccsds'
-RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
-    pybombs install gr-pyqt'
+# TODO: do not seem to be compatible with gnuradio 3.8
+# RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
+#     pybombs install gr-ccsds'
+# RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
+#     pybombs install gr-pyqt'
 RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
     pybombs install inspectrum'
 
