@@ -1,41 +1,70 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
+# Use sensible apt mirrors
+ADD sources.list /etc/apt/sources.list
+
+# Some PyBOMBS/gnuradio dependencies that aren't resolved automatically
+RUN apt-get update && apt-get -y install sudo python3-pip
 RUN apt-get update && apt-get -y install \
-     python-pip \
-     python-apt
+    gir1.2-gtk-3.0 \
+    libgtk-3-0 \
+    libpangocairo-1.0-0 \
+    python-gi-cairo \
+    python-gtk2 \
+    python-mako \
+    python-wxgtk3.0 \
+    python-wxgtk3.0 \
+    python3-gi-cairo \
+    python3-mako \
+    python3-yaml \
+    python-yaml \
+    python-six \
+    python3-six \
+    libcppunit-dev \
+    python-cheetah \
+    python-lxml \
+    python3-lxml \
+    python-numpy \
+    python-qt4 \
+    python-pyqt5 \
+    python-setuptools \
+    python3-setuptools
 
-RUN pip install PyBOMBS
+# Install tzdata - is a dependency that will fail to install later on
+ADD tzdata.sh /tzdata.sh
+RUN /tzdata.sh
 
+# Install and prepare specific PyBOMBS version
+RUN pip3 install PyBOMBS==2.3.3
 RUN pybombs auto-config
+RUN pybombs recipes add gr-recipes git+https://github.com/gnuradio/gr-recipes.git
+RUN pybombs recipes add gr-etcetera git+https://github.com/gnuradio/gr-etcetera.git
 
-RUN pybombs recipes add-defaults
-RUN pybombs prefix init /gnuradio -a gnuradio -R gnuradio-default
-RUN /bin/bash -c 'source /gnuradio/setup_env.sh && pybombs install gr-iio'
+# Install specific gnuradio version
+RUN /bin/bash -c ' \
+    pybombs prefix init /gnuradio'
+RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
+    pybombs config --package gnuradio gitrev v3.7.13.5 && \
+    pybombs install gnuradio'
 
-# Make startup script with commands to call when starting bash
-RUN touch /opt/bash-init-script.sh
-RUN echo "# If you want to run any commands when starting a container put them in this file" >> /opt/bash-init-script.sh
-RUN echo "source /gnuradio/setup_env.sh" >> /opt/bash-init-script.sh
-RUN chmod a+x /opt/bash-init-script.sh
-
-# Make entry point that uses bash and calls the startup script
-RUN touch /opt/docker-entry-script.sh
-RUN echo "#!/bin/bash" >> /opt/docker-entry-script.sh
-RUN echo "source /opt/bash-init-script.sh" >> /opt/docker-entry-script.sh
-RUN echo "/bin/bash -c \"\$*\"" >> /opt/docker-entry-script.sh
-RUN chmod a+x /opt/docker-entry-script.sh
-
-RUN cd /gnuradio/src/libiio && \
-    git fetch && \
-    git checkout v0.17 && \
-    pybombs rebuild libiio
-
-RUN cd /gnuradio/src/gr-iio && \
+# Install specific gr-iio version
+RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
+    pybombs fetch gr-iio && \
+    cd /gnuradio/src/gr-iio && \
     git remote add tausen https://github.com/tausen/gr-iio.git && \
     git fetch tausen && \
-    git checkout 5883d004f8a6e376748b17cd5b0841d3eb7c7a17 && \
-    pybombs rebuild gr-iio
+    git checkout gnuradio-docker-2.1 && \
+    pybombs install gr-iio'
 
+# Install some additional gnuradio components
+RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
+    pybombs install gr-ccsds'
+RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
+    pybombs install gr-pyqt'
+RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
+    pybombs install inspectrum'
+
+# Squelch gnuradio warning about missing xterm
 RUN apt-get update && apt-get -y install \
     xterm
 
@@ -50,31 +79,34 @@ RUN apt-get update && apt-get -y install \
     python-scipy \
     python-qwt5-qt4
 
-# install some editors for use with embedded Python blocks
+# Install some utils and editors for use with embedded Python blocks
 RUN apt-get update && \
-    apt-get -y install xdg-utils emacs gedit nano vim
+    apt-get -y install xdg-utils emacs gedit nano vim curl
 
-RUN /bin/bash -c 'cd / && \
-    git clone https://github.com/gs-jgj/gr-ccsds.git && \
-    cd gr-ccsds && \
-    git checkout 27403a22414dada1f77c30a803cd5daae330ae8d && \
-    sed -i "s/\#if 1/\#if 0/g" lib/correlator_impl.cc && \
-    mkdir build && \
-    cd build && \
-    source /gnuradio/setup_env.sh && \
-    cmake .. -DCMAKE_INSTALL_PREFIX=$(gnuradio-config-info --prefix) && \
-    make && \
-    make install'
+# Make startup script with commands to call when starting bash
+RUN touch /opt/bash-init-script.sh
+RUN echo "# If you want to run any commands when starting a container put them in this file" >> /opt/bash-init-script.sh
+RUN echo "source /gnuradio/setup_env.sh" >> /opt/bash-init-script.sh
+RUN echo "export PYTHONPATH=$PYTHONPATH/gnuradio/lib/python3/dist-packages:/gnuradio/lib/python3.6/dist-packages:/gnuradio/lib/python2.7/dist-packages:" >> /opt/bash-init-script.sh
+RUN chmod a+x /opt/bash-init-script.sh
+
+# Make entry point that uses bash and calls the startup script
+RUN touch /opt/docker-entry-script.sh
+RUN echo "#!/bin/bash" >> /opt/docker-entry-script.sh
+RUN echo "source /opt/bash-init-script.sh" >> /opt/docker-entry-script.sh
+RUN echo "/bin/bash -c \"\$*\"" >> /opt/docker-entry-script.sh
+RUN chmod a+x /opt/docker-entry-script.sh
 
 ENV QT_X11_NO_MITSHM 1
 
+# Add user
 RUN adduser --disabled-password --gecos "" --uid 1000 developer
 USER developer
 ENV HOME /home/developer
 WORKDIR /home/developer/work
 ENTRYPOINT ["/opt/docker-entry-script.sh"]
 
-# set default editor to gedit, ensure gnuradio also uses it
+# Set default editor to gedit, ensure gnuradio also uses it
 RUN echo 'SELECTED_EDITOR=/usr/bin/gedit' > /home/developer/.selected_editor
 RUN mkdir -p ~/.local/share/applications
 RUN mkdir -p ~/.config
