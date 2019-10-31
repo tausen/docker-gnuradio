@@ -83,6 +83,11 @@ RUN apt-get update && apt-get -y install \
 RUN apt-get update && \
     apt-get -y install xdg-utils emacs gedit nano vim curl
 
+# Install Python libs for use in custom blocks
+RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
+    pip  install --upgrade -t /gnuradio/lib/python2.7/dist-packages/ pyzmq && \
+    pip3 install --upgrade -t /gnuradio/lib/python3.6/dist-packages/ pyzmq'
+
 # Make startup script with commands to call when starting bash
 RUN touch /opt/bash-init-script.sh
 RUN echo "# If you want to run any commands when starting a container put them in this file" >> /opt/bash-init-script.sh
