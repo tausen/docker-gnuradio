@@ -58,6 +58,11 @@ RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
 RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
     pybombs install inspectrum'
 
+# Install latest gr-specest compatible with gnuradio 3.7
+RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
+    pybombs config --package gr-specest gitrev 91a27336b19a65125483fe0424b16f31822e7c85 && \
+    pybombs install gr-specest'
+
 # Squelch gnuradio warning about missing xterm
 RUN apt-get update && apt-get -y install \
     xterm
