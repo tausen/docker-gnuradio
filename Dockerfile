@@ -4,7 +4,7 @@ FROM ubuntu:18.04
 ADD sources.list /etc/apt/sources.list
 
 # Some PyBOMBS/gnuradio dependencies that aren't resolved automatically
-RUN apt-get update && apt-get -y install sudo python3-pip python-pip
+RUN apt-get update && apt-get -y install sudo python-pip
 RUN apt-get update && apt-get -y install \
     gir1.2-gtk-3.0 \
     libgtk-3-0 \
@@ -14,28 +14,22 @@ RUN apt-get update && apt-get -y install \
     python-mako \
     python-wxgtk3.0 \
     python-wxgtk3.0 \
-    python3-gi-cairo \
-    python3-mako \
-    python3-yaml \
     python-yaml \
     python-six \
-    python3-six \
     libcppunit-dev \
     python-cheetah \
     python-lxml \
-    python3-lxml \
     python-numpy \
     python-qt4 \
     python-pyqt5 \
-    python-setuptools \
-    python3-setuptools
+    python-setuptools
 
 # Install tzdata - is a dependency that will fail to install later on
 ADD tzdata.sh /tzdata.sh
 RUN /tzdata.sh
 
 # Install and prepare specific PyBOMBS version
-RUN pip3 install PyBOMBS==2.3.3
+RUN pip install PyBOMBS==2.3.3
 RUN pybombs auto-config
 RUN pybombs recipes add gr-recipes git+https://github.com/gnuradio/gr-recipes.git
 RUN pybombs recipes add gr-etcetera git+https://github.com/gnuradio/gr-etcetera.git
@@ -85,14 +79,13 @@ RUN apt-get update && \
 
 # Install Python libs for use in custom blocks
 RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
-    pip  install --upgrade -t /gnuradio/lib/python2.7/dist-packages/ pyzmq && \
-    pip3 install --upgrade -t /gnuradio/lib/python3.6/dist-packages/ pyzmq'
+    pip  install --upgrade -t /gnuradio/lib/python2.7/dist-packages/ pyzmq'
 
 # Make startup script with commands to call when starting bash
 RUN touch /opt/bash-init-script.sh
 RUN echo "# If you want to run any commands when starting a container put them in this file" >> /opt/bash-init-script.sh
 RUN echo "source /gnuradio/setup_env.sh" >> /opt/bash-init-script.sh
-RUN echo "export PYTHONPATH=$PYTHONPATH/gnuradio/lib/python3/dist-packages:/gnuradio/lib/python3.6/dist-packages:/gnuradio/lib/python2.7/dist-packages:" >> /opt/bash-init-script.sh
+RUN echo "export PYTHONPATH=$PYTHONPATH/gnuradio/lib/python2.7/dist-packages:/gnuradio/lib/python2.7/site-packages" >> /opt/bash-init-script.sh
 RUN chmod a+x /opt/bash-init-script.sh
 
 # Make entry point that uses bash and calls the startup script
