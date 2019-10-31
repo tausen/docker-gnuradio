@@ -50,11 +50,17 @@ RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
     git checkout gnuradio-docker-2.1 && \
     pybombs install gr-iio'
 
-# Install some additional gnuradio components
+## Install some additional gnuradio components
 RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
     pybombs install gr-ccsds'
+# Install modified version of gr-pyqt (includes spectrum plot)
 RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
-    pybombs install gr-pyqt'
+    pybombs install gr-pyqt && \
+    cd /gnuradio/src/gr-pyqt && \
+    git remote add tausen https://github.com/tausen/gr-pyqt.git && \
+    git fetch tausen && \
+    git checkout e27ebc416b78bf8ac3692b9c2654cd211fca764d && \
+    pybombs rebuild gr-pyqt'
 RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
     pybombs install inspectrum'
 
