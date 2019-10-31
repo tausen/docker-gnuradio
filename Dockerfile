@@ -4,7 +4,7 @@ FROM ubuntu:18.04
 ADD sources.list /etc/apt/sources.list
 
 # Some PyBOMBS/gnuradio dependencies that aren't resolved automatically
-RUN apt-get update && apt-get -y install sudo python3-pip
+RUN apt-get update && apt-get -y install sudo python3-pip python-pip
 RUN apt-get update && apt-get -y install \
     gir1.2-gtk-3.0 \
     libgtk-3-0 \
