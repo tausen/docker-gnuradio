@@ -69,6 +69,15 @@ RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
     pybombs config --package gr-specest gitrev 91a27336b19a65125483fe0424b16f31822e7c85 && \
     pybombs install gr-specest'
 
+# Install a recent gr-verilog
+RUN /bin/bash -c 'source /gnuradio/setup_env.sh && \
+    git clone https://github.com/B0WEN-HU/gr-verilog.git && \
+    cd gr-verilog && \
+    git checkout 460a3ebc32b51da333857d09d808005e29e0bef7 && \
+    mkdir build && cd build && cmake ../ && make && \
+    make install && ldconfig'
+RUN apt-get update && apt-get -y install verilator
+
 # Squelch gnuradio warning about missing xterm
 RUN apt-get update && apt-get -y install \
     xterm
