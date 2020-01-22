@@ -22,7 +22,8 @@ RUN apt-get update && apt-get -y install \
     python-numpy \
     python-qt4 \
     python-pyqt5 \
-    python-setuptools
+    python-setuptools \
+    libqwt-dev
 
 # Install tzdata - is a dependency that will fail to install later on
 ADD tzdata.sh /tzdata.sh
