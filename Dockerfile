@@ -87,6 +87,7 @@ RUN apt-get update && apt-get -y install \
 RUN sed -i 's/xterm_executable.*/xterm_executable = \/usr\/bin\/xterm/' /gnuradio/etc/gnuradio/conf.d/grc.conf
 
 # Download UHD USRP images
+RUN apt-get update && apt-get -y install python3-six python3-requests
 RUN /gnuradio/lib/uhd/utils/uhd_images_downloader.py
 
 # gr_filter_design dependencies
